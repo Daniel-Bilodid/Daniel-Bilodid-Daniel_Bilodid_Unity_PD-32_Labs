@@ -6885,7 +6885,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _speed: 5
   _spriteRenderer: {fileID: 1371663806}
-  _jumpForce: 400
+  _jumpForce: 300
   _groundChecker: {fileID: 1489799052}
   _groundCheckerRadius: 0.28
   _whatIsGround:

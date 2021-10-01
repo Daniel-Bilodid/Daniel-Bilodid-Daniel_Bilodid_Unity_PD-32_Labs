@@ -10,7 +10,7 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Background
   - Water
   - UI
   - Ground
@@ -18,7 +18,7 @@ TagManager:
   - Trees
   - Platforms
   - Mechanism
-  - 
+  - Enemy
   - 
   - 
   - 
@@ -43,6 +43,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: background
+    uniqueID: 1349598231
+    locked: 0
   - name: Item
     uniqueID: 481464201
     locked: 0
@@ -51,4 +54,7 @@ TagManager:
     locked: 0
   - name: Props
     uniqueID: 3090663293
+    locked: 0
+  - name: ground
+    uniqueID: 1804320151
     locked: 0

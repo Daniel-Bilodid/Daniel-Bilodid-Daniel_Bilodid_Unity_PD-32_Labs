@@ -1,13 +1,17 @@
+using System;
+using TMPro;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMover : MonoBehaviour
 {
     private Rigidbody2D _rigidbody;
 
-    [SerializeField]private float _speed;
+    [SerializeField] private float _speed;
 
     [SerializeField] private SpriteRenderer _spriteRenderer;
 
@@ -27,6 +31,8 @@ public class PlayerMover : MonoBehaviour
 
     [SerializeField] private Transform _headChecker;
 
+
+
     [Header(("Animation"))]
     [SerializeField] private Animator _animator;
     [SerializeField] private string _runAnimatorKey;
@@ -34,17 +40,79 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] private string _crawlAnimatorKey;
     //[SerializeField] private string _attackAnimatorKey;
 
+
+   [SerializeField] private int _maxHp;
+   private int _currentHp;
+
+   [SerializeField] private int _maxMana;
+    private int _currentMana;
+
+
+   [Header("UI")]
+   [SerializeField] private TMPro.TMP_Text _coinsAmountText;
+   [SerializeField] private Slider _hpBar;
+   [SerializeField] private Slider _ManaBar;
+   
+
+
     private float _verticalDirection;
     private float _horizontalDirection;
     private bool _Jump;
     private bool _crawl;
 
+    private int _coinsAmount;
+    public int CoinsAmount
+    {
+        get => _coinsAmount;
+        set
+        {
+            _coinsAmount = value;
+            _coinsAmountText.text = value.ToString();
+        }
+    }
+   private int CurrentHp
+    {
+        get => _currentHp;
+
+        set
+        {
+            if (value > _maxHp)
+            {
+                value = _maxHp;
+            }
+            _currentHp = value;
+            _hpBar.value = value;
+        }
+    }
+    private int CurrentMana
+    {
+        get => _currentMana;
+
+        set
+        {
+            if (value > _maxMana)
+            {
+                value = _maxMana;
+            }
+            _currentMana = value;
+            _ManaBar.value = value;
+        }
+    }
+    
     public bool CanClimb { private get; set; }
     //private bool _attack;
-    
+
     // Start is called before the first frame update
     private void Start()
     {
+       CoinsAmount = 0;
+
+        _ManaBar.maxValue = _maxMana;
+        CurrentMana = _maxMana;
+    
+     _hpBar.maxValue = _maxHp;
+     CurrentHp = _maxHp;
+
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -72,20 +140,20 @@ public class PlayerMover : MonoBehaviour
             }
 
             _crawl = Input.GetKey(KeyCode.C);
-           /* if (Input.GetKeyDown(KeyCode.V))
-            {
-                _attack = true;
-            }
-           */
+            /* if (Input.GetKeyDown(KeyCode.V))
+             {
+                 _attack = true;
+             }
+            */
 
         }
-      
-}
+
+    }
     private void FixedUpdate()
     {
         _rigidbody.velocity = new Vector2(_horizontalDirection * _speed, _rigidbody.velocity.y);
 
-        if(CanClimb)
+        if (CanClimb)
         {
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _verticalDirection * _speed);
             _rigidbody.gravityScale = 0;
@@ -109,7 +177,7 @@ public class PlayerMover : MonoBehaviour
 
         }
 
-        
+
 
         _animator.SetBool(_jumpAnimatorKey, !canJump);
         _animator.SetBool(_crawlAnimatorKey, !_headCollider.enabled);
@@ -121,9 +189,61 @@ public class PlayerMover : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(_headChecker.position, _headCheckerRadius);
     }
-    public void AddHp(int hpPoints)
+   public void AddHp(int hpPoints)
     {
-        Debug.Log($"Hp raised: {hpPoints}");
+        int missingHp = _maxHp - CurrentHp;
+        int pointsToAdd = missingHp > hpPoints ? hpPoints : missingHp;
+        StartCoroutine(RestoreHp(pointsToAdd));
+    }
+
+
+    private IEnumerator RestoreHp(int pointsToAdd)
+    {
+
+        while (pointsToAdd != 0)
+        {
+            pointsToAdd--;
+            CurrentHp++;
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
+   public void AddMana(int ManaPoints)
+    {
+        int missingMana = _maxMana - CurrentMana;
+        int ManaToAdd = missingMana > ManaPoints ? ManaPoints : missingMana;
+        StartCoroutine(RestoreMana(ManaToAdd));
+    }
+  
+
+    private IEnumerator RestoreMana(int ManaToAdd)
+    {
+
+        while (ManaToAdd != 0)
+        {
+            ManaToAdd--;
+            CurrentMana++;
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
+    public void TakeDamage(int damage)
+    {
+        CurrentHp -= damage;
+        if (_currentHp <= 0)
+        {
+            Debug.Log("Died");
+            gameObject.SetActive(false);
+            Invoke(nameof(ReloadScene), 1f);
+        }
+
+    }
+    public void TakeManaEater(int eater)
+    {
+        CurrentMana -= eater;
+        if (_currentMana <= 0)
+        {
+            Debug.Log("Low Mana");
+        }
+
     }
     public void OpenChest(int chest)
     {
@@ -133,8 +253,12 @@ public class PlayerMover : MonoBehaviour
     {
         Debug.Log($"You found food: {box}");
     }
-    public void AddMana(int ManaPotion)
+   /* public void AddMana(int ManaPotion)
     {
         Debug.Log($"Mana raised: {ManaPotion}");
+    }*/
+    private void ReloadScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

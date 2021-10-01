@@ -4,13 +4,20 @@ using UnityEngine;
 
 public class Chest : MonoBehaviour
 {
-    [SerializeField] private int _chest;
+    [SerializeField] private int _coinsAmount;
+
+    public bool Activated { private get; set; }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        PlayerMover player = other.gameObject.GetComponent<PlayerMover>();
+        if (!Activated)
+        {
+            return;
+        }
+        PlayerMover player = other.GetComponent<PlayerMover>();
         if (player != null)
         {
-            player.OpenChest(_chest);
+            Debug.Log($"CoinsAdded{_coinsAmount}");
+            player.CoinsAmount += _coinsAmount;
             Destroy(gameObject);
         }
     }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class Lever : MonoBehaviour
+public class Lever1 : MonoBehaviour
 {
     [SerializeField] private Sprite _activeSprite;
     private SpriteRenderer _spriteRenderer;
@@ -11,8 +11,8 @@ public class Lever : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _inactiveSprite = _spriteRenderer.sprite;
+    _spriteRenderer = GetComponent<SpriteRenderer>();
+    _inactiveSprite = _spriteRenderer.sprite;
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -20,8 +20,7 @@ public class Lever : MonoBehaviour
             if (player != null && !_activated)
         {
             _spriteRenderer.sprite = _activeSprite;
-            _activated = true;
-            Debug.Log("Activated");
+              Debug.Log("Activated");
         }
     }
 }
