@@ -39,7 +39,7 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] private string _jumpAnimatorKey;
     [SerializeField] private string _crawlAnimatorKey;
     [SerializeField] private string _hurtAnimatorKey;
-    //[SerializeField] private string _attackAnimatorKey;
+    [SerializeField] private string _attackAnimatorKey;
 
 
     [SerializeField] private int _maxHp;
@@ -53,13 +53,19 @@ public class PlayerMover : MonoBehaviour
    [SerializeField] private TMPro.TMP_Text _coinsAmountText;
    [SerializeField] private Slider _hpBar;
    [SerializeField] private Slider _ManaBar;
-   
 
+
+    [Header("Attack")]
+    [SerializeField] private int _swordDamage;
+    [SerializeField] private Transform _swordAttackPoint;
+    [SerializeField] private float _swordAttackRadius;
+    [SerializeField] private LayerMask _WhatIsEnemy;
 
     private float _verticalDirection;
     private float _horizontalDirection;
     private bool _Jump;
     private bool _crawl;
+    private bool _needToAttack;
   
 
 
@@ -125,6 +131,10 @@ public class PlayerMover : MonoBehaviour
     private void Update()
     {
         {
+            if(Input.GetButtonDown("Fire1"))
+            {
+                _needToAttack = true;
+            }
             _horizontalDirection = Input.GetAxisRaw("Horizontal");
             _verticalDirection = Input.GetAxisRaw("Vertical");
 
@@ -198,12 +208,49 @@ public class PlayerMover : MonoBehaviour
         _animator.SetBool(_jumpAnimatorKey, !canJump);
         _animator.SetBool(_crawlAnimatorKey, !_headCollider.enabled);
         //_animator.SetBool(_attackAnimatorKey, _attack);
+
+        if(_animator.GetBool(_hurtAnimatorKey))
+        {
+
+        }
+
+        if(_needToAttack)
+        {
+            StartAttack();
+        }
     }
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(_groundChecker.position, _groundCheckerRadius);
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(_headChecker.position, _headCheckerRadius);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(_swordAttackPoint.position, new Vector3(_swordAttackRadius, _swordAttackRadius, 0));
+    }
+
+    private void StartAttack()
+    {
+        if(_animator.GetBool(_attackAnimatorKey))
+        {
+            return;
+        }
+        _animator.SetBool(_attackAnimatorKey, true);
+    }
+
+    private void Attack()
+    {
+        Collider2D[] targets = Physics2D.OverlapBoxAll(_swordAttackPoint.position, 
+            new Vector2(_swordAttackRadius, _swordAttackRadius), _WhatIsEnemy);
+        foreach(var target in targets)
+        {
+            Ranged_enemy rangedEnemy = target.GetComponent<Ranged_enemy>();
+            if(rangedEnemy != null)
+            {
+                rangedEnemy.TakeDamage(_swordDamage);
+            }
+        }
+        _animator.SetBool(_attackAnimatorKey, false);
+        _needToAttack = false;
     }
    public void AddHp(int hpPoints)
     {

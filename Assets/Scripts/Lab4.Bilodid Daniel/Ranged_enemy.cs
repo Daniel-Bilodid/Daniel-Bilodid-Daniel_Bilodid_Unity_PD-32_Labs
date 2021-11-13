@@ -40,7 +40,15 @@ public class Ranged_enemy : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireCube(transform.position, new Vector3(_attackRange, 1, 0));
     }
-
+    private void ChangeHp(int hp)
+    {
+        _currentHp = hp;
+        if(_currentHp <= 0)
+        {
+            Destroy(_enemySystem);
+        }
+        _slider.value = hp;
+    }
     private void FixedUpdate()
     {
         if(_canShoot)
@@ -82,13 +90,9 @@ public class Ranged_enemy : MonoBehaviour
         _animator.SetBool(_shootAnimationKey, false);
         Invoke(nameof(CheckIfCanShoot), 1);
     }
+    
     public void TakeDamage(int damage)
     {
-        CurrentHp -= damage;
-        if(CurrentHp <=0)
-        {
-            Destroy(_enemySystem);
-            Destroy(_enemySystem);
-        }
+        ChangeHp(_currentHp - damage);
     }
 }
