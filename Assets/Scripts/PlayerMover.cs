@@ -38,10 +38,11 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] private string _runAnimatorKey;
     [SerializeField] private string _jumpAnimatorKey;
     [SerializeField] private string _crawlAnimatorKey;
+    [SerializeField] private string _hurtAnimatorKey;
     //[SerializeField] private string _attackAnimatorKey;
 
 
-   [SerializeField] private int _maxHp;
+    [SerializeField] private int _maxHp;
    private int _currentHp;
 
    [SerializeField] private int _maxMana;
@@ -59,6 +60,10 @@ public class PlayerMover : MonoBehaviour
     private float _horizontalDirection;
     private bool _Jump;
     private bool _crawl;
+  
+
+
+    private float _lastPushTime;
 
     private int _coinsAmount;
     public int CoinsAmount
@@ -109,8 +114,8 @@ public class PlayerMover : MonoBehaviour
 
         _ManaBar.maxValue = _maxMana;
         CurrentMana = _maxMana;
-    
-     _hpBar.maxValue = _maxHp;
+
+        _hpBar.maxValue = _maxHp;
      CurrentHp = _maxHp;
 
         _rigidbody = GetComponent<Rigidbody2D>();
@@ -151,6 +156,17 @@ public class PlayerMover : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        
+        bool canJump = Physics2D.OverlapCircle(_groundChecker.position, _groundCheckerRadius, _whatIsGround);
+
+        if (_animator.GetBool(_hurtAnimatorKey))
+        {
+            if(Time.time - _lastPushTime> 0.2f && canJump)
+            {
+                _animator.SetBool(_hurtAnimatorKey, false);
+            }
+            return;
+        }
         _rigidbody.velocity = new Vector2(_horizontalDirection * _speed, _rigidbody.velocity.y);
 
         if (CanClimb)
@@ -163,9 +179,9 @@ public class PlayerMover : MonoBehaviour
             _rigidbody.gravityScale = 1;
         }
 
-        bool canJump = Physics2D.OverlapCircle(_groundChecker.position, _groundCheckerRadius, _whatIsGround);
+       
         bool canStand = !Physics2D.OverlapCircle(_headChecker.position, _headCheckerRadius, _whatIsCell);
-
+        Collider2D coll = Physics2D.OverlapCircle(_headChecker.position, _headCheckerRadius, _whatIsCell);
 
 
         _headCollider.enabled = !_crawl && canStand;
@@ -225,14 +241,27 @@ public class PlayerMover : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
         }
     }
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, float pushPower = 0, float enemyPosX = 0)
     {
+     if(_animator.GetBool(_hurtAnimatorKey))
+        {
+            return;
+        }
+
         CurrentHp -= damage;
         if (_currentHp <= 0)
         {
             Debug.Log("Died");
             gameObject.SetActive(false);
             Invoke(nameof(ReloadScene), 1f);
+        }
+
+        if(pushPower !=0)
+        {
+            _lastPushTime = Time.time;
+            int _direction = transform.position.x > enemyPosX ? 1 : -1;
+            _rigidbody.AddForce(new Vector2(_direction * pushPower / 2, pushPower));
+          _animator.SetBool(_hurtAnimatorKey, true);
         }
 
     }

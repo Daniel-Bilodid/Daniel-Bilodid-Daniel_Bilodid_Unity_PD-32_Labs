@@ -19,7 +19,7 @@ TagManager:
   - Platforms
   - Mechanism
   - Enemy
-  - 
+  - EnemyProjectTile
   - 
   - 
   - 
@@ -40,11 +40,11 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Default
-    uniqueID: 0
-    locked: 0
   - name: background
     uniqueID: 1349598231
+    locked: 0
+  - name: Default
+    uniqueID: 0
     locked: 0
   - name: Item
     uniqueID: 481464201
@@ -54,6 +54,9 @@ TagManager:
     locked: 0
   - name: Props
     uniqueID: 3090663293
+    locked: 0
+  - name: enemy
+    uniqueID: 763039959
     locked: 0
   - name: ground
     uniqueID: 1804320151
